@@ -1,48 +1,30 @@
-import React, {memo, useEffect} from 'react';
-import {CityData, WeatherData} from "../../core/common-entities";
-import {connect} from "react-redux";
-import {TypeStore} from "../../store";
-import {allCities, getWeatherCities, selectWeatherCitiesData, selectWeatherErrors} from "../../core/slices";
+import React, { memo } from 'react';
+import { Bar } from "react-chartjs-2";
+import { Chart as ChartJS } from "chart.js/auto";
+import {CategoryScale} from 'chart.js';
+import s from './graphs.module.scss';
 
+
+ChartJS.register(CategoryScale);
 
 export interface GraphsProps {
-    weatherData: WeatherData[],
-    errorsWeather: any,
-    getWeatherDataOfCities: (cityData: CityData) => void;
+    chartData: any;
 }
 
 const Graphs: React.FC<GraphsProps> = ({
-  weatherData = [],
-  errorsWeather,
-  getWeatherDataOfCities,
+    chartData
 }) => {
 
-    useEffect(()=>{
-        allCities.map((city) => {
-            return getWeatherDataOfCities(city);
-        });
-    }, []);
+    console.log(chartData, 'temperatureData')
     return (
-        <>
-            11111
-        </>
+        <div className={s.chart}>
+            <Bar
+                data={chartData}
+            />
+        </div>
     )
-}
+};
 
-const mapStateToProps = (state: TypeStore) => ({
-    weatherData: selectWeatherCitiesData(state),
-    errorsWeather: selectWeatherErrors(state),
-});
-
-const mapDispatchToProps = (dispatch: any) => ({
-    getWeatherDataOfCities: (cityData: CityData) => {
-        dispatch(getWeatherCities(cityData));
-    },
-});
-
-const _Graphs = connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(memo(Graphs));
+const _Graphs = memo(Graphs);
 
 export {_Graphs as Graphs};

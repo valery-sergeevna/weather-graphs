@@ -1,11 +1,11 @@
 import React from 'react';
 import './App.css';
-import { Graphs } from "./components";
+import { MainComponent } from "./components";
 
 function App() {
   return (
     <div className="App">
-      <Graphs/>
+      <MainComponent />
     </div>
   );
 }

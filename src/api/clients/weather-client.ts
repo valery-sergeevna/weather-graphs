@@ -7,9 +7,14 @@ export interface WeatherDataApi {
     getWeathersCity(params: CityData): Observable<any> | Promise<any>;
 }
 
+
 export class WeatherClient implements WeatherDataApi {
+
     getWeathersCity(cityData: CityData): Observable<any> | Promise<any>{
         const { city, country } = cityData;
-        return ajax.get(`${BASE_API_URL}weather?q=${city},${country}&units=metric&appid=${API_KEY}`);
+        return ajax({
+            url: `${BASE_API_URL}weather?q=${city},${country}&units=metric&appid=${API_KEY}`,
+            crossDomain: true,
+        });
     };
 }

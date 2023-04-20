@@ -87,11 +87,9 @@ const ForecastChart: React.FC<ForecastChartProps> = ({
 
     return (
         <>
-            /*errors*/
             {initialLoaded && errorsWeather && (
                 <h3>An invalid request was made, correct it and try again.</h3>
             )}
-            /*loading*/
             {!initialLoaded && !errorsWeather && (
                 <h3>Please wait while the weather forecast data is loading.</h3>
             )}

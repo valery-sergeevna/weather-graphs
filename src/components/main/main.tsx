@@ -68,7 +68,6 @@ const MainComponent: React.FC<MainComponentProps> = ({
 
     return (
         <div className={s.main}>
-            /*loading*/
             {!initialLoaded && !errorsWeather && (
                 <h3>Please wait while the weather data is loading.</h3>
             )}
@@ -103,7 +102,6 @@ const MainComponent: React.FC<MainComponentProps> = ({
                     />
                 </div>
             )}
-            /*errors*/
             {initialLoaded && errorsWeather && (
                 <h3>An invalid request was made, correct it and try again.</h3>
             )}

@@ -3,11 +3,6 @@ export interface CityData {
     country: string,
 }
 
-export enum AgreeEnums {
-    false =  0,
-    true =  1,
-}
-
 export interface WeatherData {
     city: string;
     country: string;

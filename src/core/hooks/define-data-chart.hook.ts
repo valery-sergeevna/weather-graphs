@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import {useMemo} from 'react';
 import {WeatherData} from "../common-entities";
 
 
@@ -11,8 +11,9 @@ export interface useDefineDataChartProps {
 export const useDefineDataChart = ({
        weatherDataDetailed,
        parameter,
-       color = 'blue'
+       color = 'lightgrey'
 }:useDefineDataChartProps) => {
+    /*data for chart bars with parameter: temp or wind*/
     const chartData = useMemo(() => {
         return {
             labels: weatherDataDetailed.map(item => item.city),
@@ -22,7 +23,7 @@ export const useDefineDataChart = ({
                 backgroundColor: color
             }],
         }
-    }, [weatherDataDetailed]);
+    }, [weatherDataDetailed, color, parameter]);
 
     return {
         chartData

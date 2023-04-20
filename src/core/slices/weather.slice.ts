@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import { ofType } from "redux-observable";
-import {catchError, map, mergeMap, tap} from "rxjs/operators";
+import {catchError, map, mergeMap, switchMap, tap} from "rxjs/operators";
 import {forkJoin, Observable, of } from "rxjs";
-import { WeatherData } from "../common-entities";
+import {CityData, WeatherData} from "../common-entities";
 import { WeatherClient } from "../../api/clients";
 
 export const WEATHER_FEATURE_KEY = 'weather';
@@ -24,14 +24,20 @@ export type WeatherError = any;
 
 export interface WeatherState {
     weatherData: WeatherData[];
+    historyData: any;
     initialLoaded: boolean;
+    initialLoadedHistory: boolean;
     errorWeather: WeatherError;
+    errorHistoryWeather: WeatherError;
 }
 
 const initialState: WeatherState = {
     weatherData: [],
+    historyData: [],
     initialLoaded: false,
+    initialLoadedHistory: false,
     errorWeather: null,
+    errorHistoryWeather: null,
 };
 
 export const weatherSlice = createSlice({
@@ -47,6 +53,16 @@ export const weatherSlice = createSlice({
             state.initialLoaded = true;
             state.errorWeather = action.payload;
         },
+        getWeatherHistoryStart: () => {},
+        getWeatherHistorySuccess: (state, action: PayloadAction<any>) => {
+            const { response } = action.payload;
+            state.initialLoadedHistory = true;
+            state.historyData = response.list;
+        },
+        getWeatherHistoryError: (state, action: PayloadAction<WeatherError>) => {
+            state.initialLoadedHistory = true;
+            state.errorHistoryWeather = action.payload;
+        },
     },
 });
 
@@ -56,6 +72,9 @@ export const {
     getWeatherStart,
     getWeatherCitySuccess,
     getWeatherError,
+    getWeatherHistoryStart,
+    getWeatherHistorySuccess,
+    getWeatherHistoryError,
 } = weatherSlice.actions;
 
 export const getWeatherState = (rootState: any): WeatherState => rootState[WEATHER_FEATURE_KEY];
@@ -63,6 +82,12 @@ export const getWeatherState = (rootState: any): WeatherState => rootState[WEATH
 export const getWeatherCities = () => ({
     type: getWeatherStart.type,
 });
+
+export const getWeatherHistory = (params: CityData) => ({
+    type: getWeatherHistoryStart.type,
+    payload: params
+});
+
 
 export const selectWeatherCitiesData = createSelector(
     getWeatherState,
@@ -74,6 +99,7 @@ export const selectWeatherInitialLoaded = createSelector(
     (s) => s.initialLoaded,
 );
 
+//define main weather parameters for chart bars
 export const selectWeatherCitiesDataDetailed = (cities) => {
     return (cities || []).map(city => {
         const { name, main, wind, clouds, sys } = city;
@@ -93,6 +119,22 @@ export const selectWeatherErrors= createSelector(
     (s) => s.errorWeather,
 );
 
+export const selectWeatherInitialLoadedHistory = createSelector(
+    getWeatherState,
+    (s) => s.initialLoadedHistory,
+);
+
+export const selectWeatherHistory= createSelector(
+    getWeatherState,
+    (s) => s.historyData,
+);
+
+export const selectWeatherHistoryErrors = createSelector(
+    getWeatherState,
+    (s) => s.errorHistoryWeather,
+);
+
+//get weather data for all cities
 export const fetchWeatherCitiesEpic = (action$, state$, { Api }: { Api: { weather: WeatherClient } }) => action$.pipe(
     ofType(getWeatherStart.type),
     mergeMap(() =>
@@ -102,7 +144,17 @@ export const fetchWeatherCitiesEpic = (action$, state$, { Api }: { Api: { weathe
                 const result = convertedData.map(item => item.response);
                 return getWeatherCitySuccess(result);
             }),
-            tap(r => console.log(r)),
             catchError((err) => of(getWeatherError(err))),
         )),
+);
+
+//get forecast weather
+export const fetchWeatherHistoryEpic = (action$, state$, { Api }: { Api: { weather: WeatherClient } }) => action$.pipe(
+    ofType(getWeatherHistoryStart.type),
+    switchMap((action: {payload: CityData}) => (Api.weather.getForecastCity(action.payload) as Observable<any>)
+        .pipe(
+            map((convertedData) => getWeatherHistorySuccess(convertedData)),
+            catchError((err) => of(getWeatherHistoryError(err))),
+        )
+    )
 );

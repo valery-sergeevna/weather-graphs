@@ -1,6 +1,7 @@
 import { combineEpics } from "redux-observable";
-import { fetchWeatherCitiesEpic } from "../slices";
+import {fetchWeatherCitiesEpic, fetchWeatherHistoryEpic} from "../slices";
 
 export const rootEpic = combineEpics(
-    fetchWeatherCitiesEpic
+    fetchWeatherCitiesEpic,
+    fetchWeatherHistoryEpic
 );
